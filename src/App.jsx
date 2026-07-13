@@ -97,6 +97,8 @@ function useRealStats() {
 
 // ── Identity (non-blocking) ─────────────────────────────────────────────────
 const IDENTITY_KEY = 'demo_reviewer_identity'
+// Visitors get this many free edits before the sign-in prompt appears.
+const FREE_EDIT_LIMIT = 20
 
 function loadIdentity() {
   try { return JSON.parse(localStorage.getItem(IDENTITY_KEY)) || null } catch { return null }
@@ -162,8 +164,8 @@ function IdentityProvider({ children }) {
             <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-xl mx-auto mb-4">
               <User size={24} className="text-blue-600" />
             </div>
-            <h2 className="text-lg font-bold text-gray-900 text-center">Sign in to interact</h2>
-            <p className="text-xs text-gray-400 text-center mb-5">Your name and email will be attached to your changes</p>
+            <h2 className="text-lg font-bold text-gray-900 text-center">Sign in to keep editing</h2>
+            <p className="text-xs text-gray-400 text-center mb-5">You've used your {FREE_EDIT_LIMIT} free edits. Sign in to continue, and your name and email will be attached to your changes.</p>
             <form onSubmit={handleSubmit} className="space-y-3">
               <input
                 type="text"
@@ -241,6 +243,14 @@ function EditProvider({ children }) {
     const id = identityRef.current
     return { user_name: id?.name || null, user_email: id?.email || null }
   }
+
+  // Gate interactions behind the sign-in prompt only after FREE_EDIT_LIMIT edits.
+  // Signed-in visitors are unlimited; everyone else gets a grace window (counted by
+  // committed change-log entries) so they can try editing and see the change log first.
+  const gatedRequireIdentity = useCallback((action) => {
+    if (identityRef.current || changeLog.length < FREE_EDIT_LIMIT) { action(); return }
+    requireIdentity(action)
+  }, [changeLog.length, requireIdentity])
 
   const allCategories = useMemo(() => [
     ...DEFAULT_CATEGORIES,
@@ -404,8 +414,8 @@ function EditProvider({ children }) {
     updateCategory, updateNote, toggleFlag, addFeedback, undoChange, resetAll,
     downloadChangeLog, downloadEditsSnapshot, saveToServer, isSaving, saveConfirm,
     addCategory, allCategories, customCategories,
-    requireIdentity,
-  }), [edits, transactions, categories, changeLog, feedback, updateCategory, updateNote, toggleFlag, addFeedback, undoChange, resetAll, downloadChangeLog, downloadEditsSnapshot, saveToServer, isSaving, saveConfirm, addCategory, allCategories, customCategories, requireIdentity])
+    requireIdentity: gatedRequireIdentity,
+  }), [edits, transactions, categories, changeLog, feedback, updateCategory, updateNote, toggleFlag, addFeedback, undoChange, resetAll, downloadChangeLog, downloadEditsSnapshot, saveToServer, isSaving, saveConfirm, addCategory, allCategories, customCategories, gatedRequireIdentity])
 
   return <EditContext.Provider value={value}>{children}</EditContext.Provider>
 }
@@ -564,7 +574,7 @@ const TOUR_STEPS = [
   },
   {
     title: 'View Change Log',
-    description: 'Click "Change Log" in the header to see all your changes. You can undo any individual change.',
+    description: 'As soon as you make an edit, a "Change Log" button appears in the header. Click it to see every change you\'ve made, and undo any individual one.',
     tab: 'categories',
     icon: History,
   },

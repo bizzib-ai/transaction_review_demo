@@ -4,6 +4,19 @@ All notable changes to the Transaction Review Demo are documented here.
 
 ---
 
+## 2026-07-13 — Free Edit Grace Window
+
+### Sign-in gating
+- Visitors now get 20 free edits before the sign-in prompt appears (previously any edit required signing in first)
+- Grace window is counted by committed change-log entries, so a visitor can try editing and see the Change Log panel populate before being asked for name + email
+- Signed-in visitors remain unlimited; the gate is per-browser (localStorage), which is fine for synthetic demo data
+- Sign-in modal copy updated to reflect the new flow ("Sign in to keep editing" / "You've used your 20 free edits")
+
+### Guided tour
+- "View Change Log" tour step now tells visitors the Change Log button appears as soon as they make an edit
+
+---
+
 ## 2026-03-25 — Save Button + Stats Fix
 
 ### Save to Server
