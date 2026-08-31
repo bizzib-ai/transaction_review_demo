@@ -2257,7 +2257,7 @@ function AboutView() {
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Get in Touch</h3>
         <div className="flex flex-col sm:flex-row gap-4">
           <a
-            href="https://github.com/meeshmg/transaction-review-demo"
+            href="https://github.com/bizzib-ai/transaction_review_demo"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-5 py-3 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm font-medium"
